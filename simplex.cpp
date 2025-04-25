@@ -89,5 +89,66 @@ bool verific()
 int main()
 {
 cout << verific();
+
+
+float matriz[2][3];
+//  string matriz2[100][100];
+
+  vector<float> numerosFloat;
+  vector<int> numerosInt;
+  vector<int> valoresExtraidos;
+  vector<string> variaveis;
+  vector<string> vfolga;
+  //   vector<string> sinaisEncontrados;
+
+  // Processamento dos dados
+  pair<vector<int>, vector<float>> resultado = intefloat(nomeArquivo);
+  pair<vector<int>, vector<string>> resultadoVariavel = numeroevarialvel(nomeArquivo);
+  vector<string> folga = variaveldefolga(nomeArquivo);
+
+  // Atribuições dos pares
+  numerosInt = resultado.first;
+  numerosFloat = resultado.second;
+  valoresExtraidos = resultadoVariavel.first;
+  variaveis = resultadoVariavel.second;
+
+  int index = 0;
+  for (int i = 0; i < 2; i++)
+  {
+      for (int j = 0; j < 3; j++)
+      {
+         
+      if (index < valoresExtraidos.size())
+      { 
+          
+          matriz[i][j] = valoresExtraidos[index];
+          //cout  << matriz[i][j] << " ";
+          index++;
+          
+      }
+
+  }
+  cout << endl;
+}
+multiplique(matriz1,matriz2);
+
+/*int index2 = 0;
+for (int i = 0; i < 2; i++)
+{
+  for (int j = 0; j < 3; j++)
+  {
+    
+  if (index2 < variaveis.size())
+  { 
+      
+      matriz2[i][j] = variaveis[index2];
+      //cout << matriz2[i][j] << " ";
+      index2++;
+      
+  }
+
+}
+cout << endl;
+}*/
     
 }

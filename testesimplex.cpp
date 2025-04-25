@@ -7,10 +7,11 @@
 #include <utility>
 using namespace std;
 
+string nomeArquivo = "texto.txt";
 // ifstream is("texto.txt", ios::in);
 string linha;
 smatch m;
-
+int L, C;
 pair<vector<int>, vector<float>> intefloat(const string &Arquivo)
 {
 
@@ -50,14 +51,20 @@ pair<vector<int>, vector<string>> numeroevarialvel(const string &Arquivo)
 {
     ifstream arquivo(Arquivo);
     vector<int> n;
+    vector<string> linhas;
     vector<string> c;
 
-    while (getline(arquivo, linha))
-    {
+    string temp;
 
+    // Armazena todas as linhas do arquivo
+    while (getline(arquivo, linha)) {
+    
+    //armazena todas as linhas do arquivo
+
+   
         auto inicio = linha.cbegin();
-
         auto fim = linha.cend();
+    
 
         while (regex_search(inicio, fim, m, regex(R"(([+-]?[0-9]*\.?[0-9]+)?(x[0-9]+))")))
         {
@@ -89,7 +96,7 @@ vector<string> variaveldefolga(const string &Arquivo)
         auto inicio = linha.cbegin();
 
         auto fim = linha.cend();
-        while (regex_search(inicio, fim, m, regex(R"(<=|>=|=)")))
+        while (regex_search(inicio, fim, m, regex(R"(<|>|=)")))
         {
             string s = m[0];
             folga.push_back(s);
@@ -100,7 +107,8 @@ vector<string> variaveldefolga(const string &Arquivo)
     return folga;
 }
 
-float multiplique(float matriz[2][2], float matrizV[2][2]){
+float multiplique(float matriz[2][2], float matrizV[2][2])
+{
     float multi[2][2] = {0};
     int i, j;
 
@@ -108,16 +116,11 @@ float multiplique(float matriz[2][2], float matrizV[2][2]){
     {
         for (int j = 0; j < 2; j++)
         {
-        for (int k = 0; k < 2; k++)
-        {
-            multi[i][j] += matriz[i][k]  * matrizV[k][j] ;
-           
+            for (int k = 0; k < 2; k++)
+            {
+                multi[i][j] += matriz[i][k] * matrizV[k][j];
+            }
         }
-        
-           
-
-        }
-        
     }
 
     for (int i = 0; i < 2; i++)
@@ -125,88 +128,151 @@ float multiplique(float matriz[2][2], float matrizV[2][2]){
         for (int j = 0; j < 2; j++)
         {
 
-            cout << multi[i][j] <<endl;
-        }}
+            cout << multi[i][j] << endl;
+        }
+    }
 
     return multi[i][j];
-    
 }
 
+int linhas(const string &Arquivo)
+{
+    ifstream arquivo(Arquivo);
+    int i = 0;
+    while (getline(arquivo, linha))
+    {
+        i++;
+    }
+    int cont = i;
 
+    cont = cont - 1;
 
+    return cont;
+}
+// mais 1 para mais uma variavel
+int colunas(const string &Arquivo)
+{
+
+    fstream arquivo(Arquivo);
+
+    vector<string> folga = variaveldefolga(nomeArquivo);
+    int cont2 = 0;
+    while (getline(arquivo, linha))
+    {
+
+        auto inicio = linha.cbegin();
+
+        auto fim = linha.cend();
+
+            if (folga[cont2] != "=>" || folga[cont2] == "<=")
+            {
+                cout << folga[cont2] << " Variaveis de Folga \n";
+                cont2++;
+                cont2 = cont2 + 1;
+            }
+
+        
+    }
+
+    return cont2;
+}
+
+int contarRestricoes(const string &Arquivo) {
+    ifstream arquivo(Arquivo);
+    int total = 0;
+    while (getline(arquivo, linha)) total++;
+    return total - 2; // desconsidera objetivo e última linha
+}
 
 int main()
 {
-   float matriz1[2][2] = {
-        {1, 2},
-        {3, 4}
-    };
 
-    float matriz2[2][2] = {
-        {5, 6},
-        {7,8}
-    };
-    string nomeArquivo = "texto.txt";
+   
 
-    float matriz[2][3];
-  //  string matriz2[100][100];
-
-    vector<float> numerosFloat;
-    vector<int> numerosInt;
-    vector<int> valoresExtraidos;
     vector<string> variaveis;
-    vector<string> vfolga;
-    //   vector<string> sinaisEncontrados;
-
-    // Processamento dos dados
-    pair<vector<int>, vector<float>> resultado = intefloat(nomeArquivo);
+    vector<int> numero;
+    int lines;
+  // cout << colunas(nomeArquivo) << endl; 
+    
     pair<vector<int>, vector<string>> resultadoVariavel = numeroevarialvel(nomeArquivo);
-    vector<string> folga = variaveldefolga(nomeArquivo);
+    vector<string> Vfolga = variaveldefolga(nomeArquivo);
 
-    // Atribuições dos pares
-    numerosInt = resultado.first;
-    numerosFloat = resultado.second;
-    valoresExtraidos = resultadoVariavel.first;
     variaveis = resultadoVariavel.second;
+    numero = resultadoVariavel.first;
 
-    int index = 0;
-    for (int i = 0; i < 2; i++)
+    int cont = 0;
+
+    for (int i = 0; i < lines - 1; i++)
     {
-        for (int j = 0; j < 3; j++)
+
+        cout << variaveis[i] << "  Variaveis\n ";
+
+        cont++;
+        // soma os valores das variaveis com as variaveis de folga
+    }
+    cout << cont << endl;
+
+    for (int i = 0; i < numero.size(); i++)
+    {
+        cout << numero[i] << "numeros"<<endl;
+        
+    }
+    
+
+    int cont2 = 0;
+    int v = 0;
+    for (int i = 0; i < Vfolga.size(); i++)
+    {
+
+        if (Vfolga[i] == ">" || Vfolga[i] == "<")
         {
+            cout << Vfolga[i] << " Variaveis de Folga \n";
+            cont2++;
            
-        if (index < valoresExtraidos.size())
-        { 
-            
-            matriz[i][j] = valoresExtraidos[index];
-            //cout  << matriz[i][j] << " ";
-            index++;
-            
         }
 
+        
     }
-    cout << endl;
-}
-multiplique(matriz1,matriz2);
 
-/*int index2 = 0;
-for (int i = 0; i < 2; i++)
-{
-    for (int j = 0; j < 3; j++)
+    cout << cont + cont2 << "colunas" << endl;
+    
+
+    L = cont;
+    C = cont + cont2;
+    
+  
+
+    int idx = 0;
+    vector<vector<float>> MatrizA(L, vector<float>(C, 0.0)); 
+   
+
+    for (int i = 0; i < L; i++)
     {
-      
-    if (index2 < variaveis.size())
-    { 
+        for (int j = 0; j < C; j++)
+        {
+            MatrizA[i][j] = numero[idx++];
+        }
         
-        matriz2[i][j] = variaveis[index2];
-        //cout << matriz2[i][j] << " ";
-        index2++;
-        
-    }
 
-}
-cout << endl;
-}*/
+
+    }
+    
+
+    for (int i = 0; i < L; i++) {
+        for (int j = 0; j < C; j++) {
+            cout << setw(6) << MatrizA[i][j] << "";
+        }
+        cout << endl;
+    }
+    
+
+    
+
+    // 3 linhas, coluna em relação as variaveis
+    // aumenta numero de colunas de for maior e menor
+
+
+
 
 
     return 0;
