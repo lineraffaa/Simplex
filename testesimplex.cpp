@@ -12,8 +12,11 @@ string nomeArquivo = "texto.txt";
 string linha;
 smatch m;
 int L, C;
+int contador;
+
 pair<vector<int>, vector<float>> intefloat(const string &Arquivo)
 {
+    cout << "Aqui \n";
 
     ifstream arquivo(Arquivo);
     vector<int> seq;
@@ -31,15 +34,14 @@ pair<vector<int>, vector<float>> intefloat(const string &Arquivo)
                 int numero = stoi(m[0]);
                 seq.push_back(numero);
 
-                // cout << "Número encontrado: " << numero << endl;
+                cout << "Número encontrado: " << numero << endl;
             }
 
-            if (regex_match(token, m, regex(R"(^[+-]?[0-9]*\.[0-9]+$)")))
+           else if (regex_match(token, m, regex(R"(^([+-]?[0-9]*\.[0-9]+)$)")))
             {
-                float numero = stof(m[0]);
+                float numero = stof(m[1].str());
                 F.push_back(numero);
-
-                //  cout << "Número decimal encontrado: " << numero << endl;
+                cout << "Número decimal encontrado: " << numero << endl;
             }
         }
     }
@@ -47,7 +49,108 @@ pair<vector<int>, vector<float>> intefloat(const string &Arquivo)
     return {seq, F};
 }
 
-pair<vector<int>, vector<string>> numeroevarialvel(const string &Arquivo)
+
+
+pair<vector<float>, vector<string>> floatvarialvel(const string &Arquivo)
+{
+    ifstream arquivo(Arquivo);
+    vector<float> n;
+    vector<string> linhas;
+    vector<string> c;
+
+    string temp;
+
+    // Armazena todas as linhas do arquivo
+    while (getline(arquivo, linha))
+    {
+
+        // armazena todas as linhas do arquivo
+
+        auto inicio = linha.cbegin();
+        auto fim = linha.cend();
+
+        while (regex_search(inicio, fim, m, regex(R"(([+-]?(?:[0-9]+(?:\.[0-9]+)?)?)(x[0-9]+))"
+
+                                                  )))
+        {
+            string coefstr = m[1].str();
+
+            float coef;
+
+            if (coefstr.empty() || coefstr == "+")
+            {
+                coef = 1.0;
+            }
+            else if (coefstr == "-")
+            {
+                coef = -1.0;
+            }
+            else
+            {
+                coef = stof(coefstr); // Converte corretamente para float
+            }
+
+            string variavel = m[2].str();
+            n.push_back(coef);
+            c.push_back(variavel);
+
+            inicio = m.suffix().first;
+        }
+    }
+
+    return {n, c};
+}
+
+pair<vector<float>, vector<string>> numeroevarialvel(const string &Arquivo)
+{
+    ifstream arquivo(Arquivo);
+
+    vector<float> n;
+    vector<string> linhas;
+    vector<string> c;
+
+    string temp;
+
+    // Armazena todas as linhas do arquivo
+    while (getline(arquivo, linha))
+    {
+
+        // armazena todas as linhas do arquivo
+
+        auto inicio = linha.cbegin();
+        auto fim = linha.cend();
+
+        while (regex_search(inicio, fim, m, regex(R"(([+-]?[0-9]*\.?[0-9]+)?(x[0-9]+))")))
+        {
+            string coefstr = m[1].str();
+
+            float coef;
+
+            if (coefstr.empty() || coefstr == "+")
+            {
+                coef = 1.0;
+            }
+            else if (coefstr == "-")
+            {
+                coef = -1.0;
+            }
+            else
+            {
+                coef = stof(coefstr); // Converte corretamente para float
+            }
+
+            string variavel = m[2].str();
+            n.push_back(coef);
+            c.push_back(variavel);
+
+            inicio = m.suffix().first;
+        }
+    }
+
+    return {n, c};
+}
+
+/*pair<vector<int>, vector<string>> numeroevarialvel(const string &Arquivo)
 {
     ifstream arquivo(Arquivo);
     vector<int> n;
@@ -58,15 +161,18 @@ pair<vector<int>, vector<string>> numeroevarialvel(const string &Arquivo)
 
     // Armazena todas as linhas do arquivo
     while (getline(arquivo, linha)) {
-    
+
     //armazena todas as linhas do arquivo
 
-   
+
+
+
         auto inicio = linha.cbegin();
         auto fim = linha.cend();
-    
 
-        while (regex_search(inicio, fim, m, regex(R"(([+-]?[0-9]*\.?[0-9]+)?(x[0-9]+))")))
+
+        while (regex_search(inicio, fim, m, regex(regex(R"(([+-]?[0-9]*\.?[0-9]+)?(x[0-9]+))")
+    )))
         {
             string coef = m[1].matched ? m[1].str() : "1";
             if (coef == "+" || coef == "-")
@@ -84,7 +190,7 @@ pair<vector<int>, vector<string>> numeroevarialvel(const string &Arquivo)
     }
 
     return {n, c};
-}
+}*/
 
 vector<string> variaveldefolga(const string &Arquivo)
 {
@@ -96,8 +202,9 @@ vector<string> variaveldefolga(const string &Arquivo)
         auto inicio = linha.cbegin();
 
         auto fim = linha.cend();
-        while (regex_search(inicio, fim, m, regex(R"(<|>|=)")))
+        while (regex_search(inicio, fim, m, regex(R"((<=|>=|<|>|=))")))
         {
+
             string s = m[0];
             folga.push_back(s);
             // cout << " | Variável de folga: " << s << endl;
@@ -150,7 +257,7 @@ int linhas(const string &Arquivo)
     return cont;
 }
 // mais 1 para mais uma variavel
-int colunas(const string &Arquivo)
+/*int colunas(const string &Arquivo)
 {
 
     fstream arquivo(Arquivo);
@@ -164,43 +271,98 @@ int colunas(const string &Arquivo)
 
         auto fim = linha.cend();
 
-            if (folga[cont2] != "=>" || folga[cont2] == "<=")
+            if (folga[cont2] != ">" || folga[cont2] == "<")
             {
                 cout << folga[cont2] << " Variaveis de Folga \n";
                 cont2++;
                 cont2 = cont2 + 1;
             }
 
-        
+
     }
 
     return cont2;
 }
+*/
 
-int contarRestricoes(const string &Arquivo) {
+int contarRestricoes(const string &Arquivo)
+{
     ifstream arquivo(Arquivo);
+
     int total = 0;
-    while (getline(arquivo, linha)) total++;
-    return total - 2; // desconsidera objetivo e última linha
+
+    while (getline(arquivo, linha))
+    {
+
+        total++;
+    }
+    return total - 1; // desconsidera objetivo e última linha
 }
 
 int main()
 {
 
-   
-
     vector<string> variaveis;
-    vector<int> numero;
-    int lines;
-  // cout << colunas(nomeArquivo) << endl; 
-    
-    pair<vector<int>, vector<string>> resultadoVariavel = numeroevarialvel(nomeArquivo);
+    vector<float> numero;
+    vector<float> numerof;
+    vector<string> fn;
+    vector<int> nint;
+    vector<float> nf;
+    int lines = 0;
+    lines = contarRestricoes(nomeArquivo);
+    // cout << colunas(nomeArquivo) << endl;
+    cout << lines << "linha \n";
+    pair<vector<float>, vector<string>> resultadoVariavel = numeroevarialvel(nomeArquivo);
     vector<string> Vfolga = variaveldefolga(nomeArquivo);
+
+    cout << "Agora \n";
+    pair<vector<int>, vector<float>> numint = intefloat(nomeArquivo);
+
+    pair<vector<float>, vector<string>> resulf = floatvarialvel(nomeArquivo);
 
     variaveis = resultadoVariavel.second;
     numero = resultadoVariavel.first;
+    numerof = resulf.first;
+    fn = resulf.second;
+
+    nint = numint.first;
+    nf = numint.second;
+
+    int nVariaveis = 0;
+    ifstream arquivo(nomeArquivo);
+    string primeiraLinha;
+    if (getline(arquivo, primeiraLinha))
+    {
+        auto inicio = primeiraLinha.cbegin();
+        auto fim = primeiraLinha.cend();
+
+        while (regex_search(inicio, fim, m, regex(R"(([+-]?[0-9]*\.?[0-9]+)?(x[0-9]+))")))
+        {
+            nVariaveis++;
+            // para contar quado as variaveis são encontradas
+            inicio = m.suffix().first;
+        }
+    }
+    arquivo.close();
+
+    vector<string> folga;
+    int indx = 0;
 
     int cont = 0;
+
+    for (int i = 0; i < lines - 1; i++)
+    {
+
+        cout << nint[i] << "  numeros intiros";
+
+        // soma os valores das variaveis com as variaveis de folga
+    }
+
+    for (int i = 0; i < lines - 1; i++)
+    {
+
+        cout << nf[i] << "  numeros decimal";
+    }
 
     for (int i = 0; i < lines - 1; i++)
     {
@@ -212,68 +374,149 @@ int main()
     }
     cout << cont << endl;
 
-    for (int i = 0; i < numero.size(); i++)
+    /*   for (int i = 0; i < numero.size(); i++)
+      {
+          cout << numero[i] << "numeros"<<endl;
+
+          // os numeros em relação as variaveis
+
+      }*/
+
+    for (int i = 0; i < numerof.size(); i++)
     {
-        cout << numero[i] << "numeros"<<endl;
-        
+        cout << numerof[i] << "numeros float\n";
     }
-    
 
     int cont2 = 0;
     int v = 0;
+    vector<float> f;
+    vector<string> vf;
+   
+    for (int i = 0; i < Vfolga.size(); i++)
+    {
+        // cout << Vfolga[i] << " Variaveis de Folga2 \n";
+
+        if (Vfolga[i] == ">=" || Vfolga[i] == "<=")
+        {
+            //  cout << Vfolga[i] << " Variaveis de Folga \n";
+
+            cont2++;
+        }
+        //  cout << vf[i] << "vf" << endl;
+    }
+
+    cout << "AAAAaaqqqui \n";
+    cout << Vfolga.size() << endl;
+    cout << f.size() << endl;
+
     for (int i = 0; i < Vfolga.size(); i++)
     {
 
-        if (Vfolga[i] == ">" || Vfolga[i] == "<")
+        if (Vfolga[i] == "<=")
         {
-            cout << Vfolga[i] << " Variaveis de Folga \n";
-            cont2++;
-           
-        }
+            f.push_back(1);
 
-        
+            //   cout << Vfolga[i] << "AAaAqqui" << endl;
+        }
+        else if (Vfolga[i] == ">=")
+        {
+            f.push_back(-1);
+        }
+        else
+        {
+            f.push_back(0);
+        }
+        // cout << f[i] << "valores de f \n";
     }
 
-    cout << cont + cont2 << "colunas" << endl;
-    
+    L = lines;
+    C = nVariaveis + cont2;
 
-    L = cont;
-    C = cont + cont2;
-    
-  
+    cout << nVariaveis << "nv \n";
 
-    int idx = 0;
-    vector<vector<float>> MatrizA(L, vector<float>(C, 0.0)); 
-   
+    int idx = nVariaveis;
+    vector<vector<float>> MatrizA(L, vector<float>(C, 0.0));
+
+    for (int i = 0; i < L; i++)
+    {
+        for (int j = 0; j < nVariaveis; j++)
+        {
+            if (idx < numerof.size())
+            {
+
+                MatrizA[i][j] = numerof[idx++];
+            }
+        }
+    }
+
+    /*int  idxx = 0;
+    for (int i = 0; i < L; i++)
+    {
+        for (int j = 0; j < nVariaveis; j++)
+        {
+            if (idxx < numerof.size()) {
+                MatrizA[i][j] = numerof[idxx++];
+            }
+
+        }
+
+    }*/
+
+    // Agora insere 1 ou -1 nas colunas de folga
+ 
+
+    int idxFolga = 0;
+    int colFolga = nVariaveis;
+
+    for (int i = 0; i < L && idxFolga < f.size(); i++)
+    {
+
+        if (idxFolga < f.size())
+        {
+            if (f[idxFolga] != 0)
+            {
+                cout << f[idxFolga] << endl;
+                MatrizA[i][colFolga] = f[idxFolga];
+                colFolga++; // só avança se for folga válida
+            }
+        }
+        idxFolga++;
+    }
 
     for (int i = 0; i < L; i++)
     {
         for (int j = 0; j < C; j++)
         {
-            MatrizA[i][j] = numero[idx++];
-        }
-        
-
-
-    }
-    
-
-    for (int i = 0; i < L; i++) {
-        for (int j = 0; j < C; j++) {
             cout << setw(6) << MatrizA[i][j] << "";
         }
         cout << endl;
     }
-    
-
-    
-
-    // 3 linhas, coluna em relação as variaveis
-    // aumenta numero de colunas de for maior e menor
-
-
-
-
 
     return 0;
 }
+
+/*int index = C;
+    for (int i = 0; i < L; i++)
+    {
+        for (int j = 0; j < indx; j++)
+        {
+
+
+                if (MatrizA[i][j] == 0)
+                {
+                    MatrizA[i][j] = f[index++];
+
+                }
+
+
+
+
+
+
+
+        }
+
+    }*/
+
+// 3 linhas, coluna em relação as variaveis
+// aumenta numero de colunas de for maior e menor
