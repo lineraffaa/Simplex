@@ -1,0 +1,5 @@
+// ! Isso é importante (vermelho)
+// * Dica ou observação (verde)
+// ? Pergunta ou dúvida (azul)
+// // Comentário comum (cinza)
+// TODO: tarefa a fazer (laranja)
