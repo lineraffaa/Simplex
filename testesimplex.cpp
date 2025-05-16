@@ -313,7 +313,7 @@ float detlaplace(const vector<vector<float>> &A)
         }
     }*/
     //! fixa a linha com mais zeros, vai percorrendo a colunas
-  //  cout << "Linha com mais zeros: " << linhaComMaisZeros << endl;
+    //  cout << "Linha com mais zeros: " << linhaComMaisZeros << endl;
     // cout << "Coluna com mais zeros: " << colunamaiszeros << endl;
     float determinante = 0;
     //! Ja verifiquei a linha e coluna com mais zeros, agora preciso retirar a linha e coluna com mais zeros
@@ -329,8 +329,8 @@ float detlaplace(const vector<vector<float>> &A)
         {
             if (i == linhaComMaisZeros)
                 continue;
-            //cout << i << "i" << endl;
-          //  cout << linhaComMaisZeros << "debug" << endl;
+            // cout << i << "i" << endl;
+            //  cout << linhaComMaisZeros << "debug" << endl;
             vector<float> novaLinha;
             for (int k = 0; k < C; k++)
             {
@@ -345,7 +345,7 @@ float detlaplace(const vector<vector<float>> &A)
         float detSub = detlaplace(submatriz);
         determinante += cofator * detSub;
     }
-    //cout << determinante << "det \n";
+    // cout << determinante << "det \n";
     return determinante;
 
     //! calcular o det da matriz 3 por 3
@@ -368,7 +368,7 @@ vector<vector<float>> Matriz_inversa(vector<vector<float>> matrizI)
 
         if (fabs(divisor) < 1e-6)
         {
-            cout << "Erro: pivô zero. Matriz pode não ser inversível.\n";
+            cout << "Erro: pivo zero. Matriz pode não ser inversível.\n";
             return {};
         }
 
@@ -408,31 +408,31 @@ vector<vector<float>> Matriz_inversa(vector<vector<float>> matrizI)
     return matrizidentidade;
 }
 
-
-void FaseI(const string &Arquivo) {
+void FaseI(const string &Arquivo)
+{
     ifstream arquivo(Arquivo);
-
- 
 
     string linha;
     getline(arquivo, linha);
 
-    regex regexMax("max", regex_constants::icase);  // detecta "max"
+    regex regexMax("max", regex_constants::icase); // detecta "max"
     string novaLinha;
 
     // Verifica se é um problema de maximização
-    if (regex_search(linha, regexMax)) {
-        linha = regex_replace(linha, regexMax, "min");  //!troca "max" por "min"
+    if (regex_search(linha, regexMax))
+    {
+        linha = regex_replace(linha, regexMax, "min"); //! troca "max" por "min"
 
         // Separa parte antes e depois do '='
         size_t Igual = linha.find('=');
-        if (Igual == string::npos) {
+        if (Igual == string::npos)
+        {
             cerr << "Formato inválido da função objetivo.\n";
             return;
         }
 
-        string esquerda = linha.substr(0, Igual);       //! Ex: "min z"
-        string direita = linha.substr(Igual + 1);      //! Ex: "2x1 + x2"
+        string esquerda = linha.substr(0, Igual); //! Ex: "min z"
+        string direita = linha.substr(Igual + 1); //! Ex: "2x1 + x2"
         string Modificada;
 
         //! Para encontrar coeficientes e variáveis
@@ -440,61 +440,83 @@ void FaseI(const string &Arquivo) {
         sregex_iterator iter(direita.begin(), direita.end(), coef);
         sregex_iterator end;
 
-        //*percorrer a primeira a linha 
+        //*percorrer a primeira a linha
         size_t fim = 0;
-        for(iter; iter != end; iter++){
+        for (iter; iter != end; iter++)
+        {
             string letra = iter->str();
             size_t ultimo = iter->position();
 
-           // cout << letra <<endl;
-            //cout << ultimo << endl;
+            // cout << letra <<endl;
+            // cout << ultimo << endl;
 
-            Modificada += direita.substr(fim,ultimo - fim);
+            Modificada += direita.substr(fim, ultimo - fim);
             //! aqui estou pegando a parte do min z
-           
 
             string valores = iter->str(1);
             string x = iter->str(2);
 
-            //! para remover os espaços dos valores 
-            valores.erase(remove(valores.begin(), valores.end(), ' '), valores.end()); 
+            //! para remover os espaços dos valores
+            valores.erase(remove(valores.begin(), valores.end(), ' '), valores.end());
             //! para verifcar os valores como x1
             if (valores.empty() || valores == "+" || valores == "-")
             {
                 valores += "1";
             }
-         
+
             //! para converter uma string para um float
             float valor = stof(valores);
             valor *= -1;
 
-           if(valor >= 0 && !Modificada.empty() && Modificada.back() != '-' ){
+            if (valor >= 0 && !Modificada.empty() && Modificada.back() != '-')
+            {
                 Modificada += "+";
             }
-          
-        ostringstream saida; //!permite escrever em uma string como se fosse um cout
-        saida << fixed << setprecision(0) << valor;
-        Modificada += saida.str() + x;
+
+            ostringstream saida; //! permite escrever em uma string como se fosse um cout
+            saida << fixed << setprecision(0) << valor;
+            Modificada += saida.str() + x;
 
             fim = ultimo + letra.length();
-
-            
         }
-        //!substr é para pegar uma parte da string, acessa o inicio ou o final
-        Modificada += direita.substr(fim); 
+        //! substr é para pegar uma parte da string, acessa o inicio ou o final
+        Modificada += direita.substr(fim);
 
         novaLinha = esquerda + " = " + Modificada;
-        
-        cout << novaLinha << endl;
-    
-    }
 
-;
+        cout << novaLinha << endl;
+    }
 }
 
+void FaseII(const string &Arquivo, vector<vector<float>> basica, vector<vector<float>> b)
+{
+    vector<vector<float>> xb;
+    xb = Matriz_inversa(basica); // multiplicação
 
+    multiplique(xb,b);
+    cout << "AQUI\n";
+    vector<float> var;
+
+    ifstream arquivo(Arquivo);
+
+    string linha;
+    getline(arquivo, linha);
+
+    string novaLinha;
+    // Separa parte antes e depois do '='
+    size_t Igual = linha.find('=');
+    string direita = linha.substr(Igual + 1); //! Ex: "2x1 + x2"
+    string linha1;
+
+    pair<vector<float>, vector<string>> resultado = floatvarialvel(linha1);
+
+    var = resultado.first;
+    for (int i = 0; i < var.size(); i++)
+    {
+        cout << var[i] << endl;
+    }
     
-
+}
 
 int main()
 {
@@ -510,7 +532,6 @@ int main()
     vector<string> vf;
 
     //* matriz para calcular o laplace
-   
 
     //* Para receber valores inteiros
     vector<int> nint;
@@ -824,11 +845,11 @@ int main()
     vector<vector<float>> matriziversa = {
         {1, 2, 3},
         {0, 1, 4},
-        {0, 0 ,1}
-    };
-    FaseI(nomeArquivo);
-    Matriz_inversa(matriziversa);
+        {0, 0, 1}};
+    //FaseI(nomeArquivo);
+    FaseII(nomeArquivo,MatrizBasica,MatrizB);
+    //Matriz_inversa(matriziversa);
     cout << "Aquiii \n";
-    
+
     return 0;
 }
