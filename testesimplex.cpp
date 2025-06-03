@@ -9,6 +9,7 @@
 #include <ctime>
 #include <random>
 #include <algorithm>
+#include <set>
 using namespace std;
 
 string nomeArquivo = "texto.txt";
@@ -42,21 +43,20 @@ vector<float> intefloat(const string &Arquivo)
                 // Número inteiro
                 float numero = stof(m[0]);
                 todosNumeros.push_back(numero);
-              //  cout << numero << " (int)\n";
+                //  cout << numero << " (int)\n";
             }
             else if (regex_match(token, m, regex(R"(^[+-]?[0-9]*\.[0-9]+$)")))
             {
                 // Número decimal
                 float numero = stof(m[0]);
                 todosNumeros.push_back(numero);
-             //   cout << numero << " (float)\n";
+                //   cout << numero << " (float)\n";
             }
         }
     }
 
     return todosNumeros;
 }
-
 
 pair<vector<float>, vector<string>> floatvarialvel(const string &Arquivo)
 {
@@ -68,13 +68,16 @@ pair<vector<float>, vector<string>> floatvarialvel(const string &Arquivo)
     bool primeiraLinha = true;
 
     //!  encontrar todas as variáveis (na função objetivo)
-    if (getline(arquivo, linha)) {
+    if (getline(arquivo, linha))
+    {
         smatch m;
         auto ini = linha.cbegin();
         auto fim = linha.cend();
-        while (regex_search(ini, fim, m, regex(R"(x[0-9]+)"))) {
+        while (regex_search(ini, fim, m, regex(R"(x[0-9]+)")))
+        {
             string var = m.str();
-            if (find(todasVariaveis.begin(), todasVariaveis.end(), var) == todasVariaveis.end()) {
+            if (find(todasVariaveis.begin(), todasVariaveis.end(), var) == todasVariaveis.end())
+            {
                 todasVariaveis.push_back(var);
             }
             ini = m.suffix().first;
@@ -92,28 +95,29 @@ pair<vector<float>, vector<string>> floatvarialvel(const string &Arquivo)
         auto fim = linha.cend();
 
         while (regex_search(ini, fim, m, regex(R"(([+-]?[0-9]*\.?[0-9]+)?(x[0-9]+))")))
-        {   
+        {
             //! m armazena os grupos capturados pelo regex
             string coefstr = m[1].str(); //! pega o coeficiente como string
-            string var = m[2].str(); //! pega a variável como string
+            string var = m[2].str();     //! pega a variável como string
 
             float coef = 1.0;
-            if (coefstr == "-") coef = -1.0;
-            else if (!coefstr.empty()) coef = stof(coefstr);
+            if (coefstr == "-")
+                coef = -1.0;
+            else if (!coefstr.empty())
+                coef = stof(coefstr);
 
-            //! find() para encontra a posição 
+            //! find() para encontra a posição
             auto it = find(todasVariaveis.begin(), todasVariaveis.end(), var);
-            if (it != todasVariaveis.end()) {
+            if (it != todasVariaveis.end())
+            {
                 int pos = distance(todasVariaveis.begin(), it);
                 linhaCoef[pos] = coef;
             }
-        //!it vai apontar para "x2" dentro do vetor
+            //! it vai apontar para "x2" dentro do vetor
 
-        //!distance(todasVariaveis.begin(), it) vai retornar 1 (índice da variável)
+            //! distance(todasVariaveis.begin(), it) vai retornar 1 (índice da variável)
 
-        //!Então linhaCoef[1] = coef; vai atualizar o coeficiente da variável "x2".
-
-
+            //! Então linhaCoef[1] = coef; vai atualizar o coeficiente da variável "x2".
 
             ini = m.suffix().first;
         }
@@ -126,19 +130,17 @@ pair<vector<float>, vector<string>> floatvarialvel(const string &Arquivo)
     }
     // !Na função insert do vetor, o primeiro parâmetro é onde você vai inserir os novos elementos.
 
-  //!  todosCoeficientes.end() significa: insere no final do vetor todosCoeficientes.
+    //!  todosCoeficientes.end() significa: insere no final do vetor todosCoeficientes.
 
-//! Os próximos dois parâmetros são um intervalo de elementos que você quer inserir:
+    //! Os próximos dois parâmetros são um intervalo de elementos que você quer inserir:
 
-  //!  linhaCoef.begin() — início do vetor linhaCoef
+    //!  linhaCoef.begin() — início do vetor linhaCoef
 
-   //! linhaCoef.end() — fim do vetor linhaCoef
+    //! linhaCoef.end() — fim do vetor linhaCoef
 
-//! Ou seja, insere todos os elementos de linhaCoef (do começo ao fim) no final de todosCoeficientes.
+    //! Ou seja, insere todos os elementos de linhaCoef (do começo ao fim) no final de todosCoeficientes.
     return {todosCoeficientes, todasVariaveis};
 }
-
-
 
 pair<vector<float>, vector<string>> numeroevarialvel(const string &Arquivo)
 {
@@ -150,7 +152,7 @@ pair<vector<float>, vector<string>> numeroevarialvel(const string &Arquivo)
     vector<string> c;
 
     string temp;
-    
+
     // Armazena todas as linhas do arquivo
     while (getline(arquivo, linha))
     {
@@ -192,24 +194,30 @@ pair<vector<float>, vector<string>> numeroevarialvel(const string &Arquivo)
 
 vector<string> variaveldefolga(const string &Arquivo)
 {
-    // função para receber as variavies de folga
     ifstream arquivo(Arquivo);
     vector<string> folga;
+    string linha;
+    smatch m;
+
     while (getline(arquivo, linha))
     {
-
         auto inicio = linha.cbegin();
-
         auto fim = linha.cend();
+
         while (regex_search(inicio, fim, m, regex(R"((<=|>=|<|>|=))")))
         {
-
             string s = m[0];
+            s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end()); // Remove espaços se houver
             folga.push_back(s);
-            // cout << " | Variável de folga: " << s << endl;
+
             inicio = m.suffix().first;
         }
     }
+    for (int i = 0; i < folga.size(); i++)
+    {
+        //     cout << folga[i] << endl;
+    }
+
     return folga;
 }
 
@@ -249,6 +257,36 @@ vector<vector<float>> multiplique(const vector<vector<float>> &A, const vector<v
     return resultado;
 }
 
+vector<float> X1(const string &Arquivo)
+{
+
+    ifstream arquivo(Arquivo);
+    regex re("x(\\d+)");
+    string linha;
+    smatch match;
+    set<int> expoentesUnicos;
+
+    while (getline(arquivo, linha))
+    {
+        auto inicio = sregex_iterator(linha.begin(), linha.end(), re);
+        auto fim = sregex_iterator();
+
+        for (auto i = inicio; i != fim; ++i)
+        {
+            //! Um loop que percorre todos os matches encontrados pela regex na linha.
+            smatch match = *i; //! aqui estou acessando o conteudo ao qual aponto *it
+            //! o que esta sendo capturado no arquivo como x2
+            int expoente = stoi(match[1]);    //! esta sendo capturado 2
+            expoentesUnicos.insert(expoente); //! é para ignorar as repetções
+
+            //  cout << "Expoente encontrado: " << expoente << endl;
+        }
+    }
+    vector<float> X(expoentesUnicos.begin(), expoentesUnicos.end());
+
+    return X;
+}
+
 int linhas(const string &Arquivo)
 {
     ifstream arquivo(Arquivo);
@@ -278,7 +316,7 @@ int contarRestricoes(const string &Arquivo)
     return total - 1; //*desconsidera objetivo e última linha
 }
 // TODO fazer o laplaca, colocar a verificação para matriz 1 por e 2 por 2
-vector<float> pegarColuna(const vector<vector<float>> &A, int j)
+/*vector<float> pegarColuna(const vector<vector<float>> &A, int j)
 {
     vector<float> coluna;
     for (int i = 0; i < A.size(); i++)
@@ -286,7 +324,7 @@ vector<float> pegarColuna(const vector<vector<float>> &A, int j)
         coluna.push_back(A[i][j]);
     }
     return coluna;
-}
+}*/
 
 float detlaplace(const vector<vector<float>> &A)
 {
@@ -330,7 +368,7 @@ float detlaplace(const vector<vector<float>> &A)
             }
         }
     }
-    
+
     //! fixa a linha com mais zeros, vai percorrendo a colunas
     //  cout << "Linha com mais zeros: " << linhaComMaisZeros << endl;
     // cout << "Coluna com mais zeros: " << colunamaiszeros << endl;
@@ -339,7 +377,7 @@ float detlaplace(const vector<vector<float>> &A)
     //* trcho de codigo para fazer esse etapa
     for (int j = 0; j < C; j++)
     {
-        if (A[linhaComMaisZeros][j] == 0)
+        if (A[linhaComMaisZeros][j] == 0) //! pula os elementos que são zero
             continue;
 
         // Construir submatriz excluindo linha i e coluna j
@@ -348,20 +386,41 @@ float detlaplace(const vector<vector<float>> &A)
         {
             if (i == linhaComMaisZeros)
                 continue;
+            //! a linha usada na expansão de Laplace. Você não quer incluí-la na submatriz.
             // cout << i << "i" << endl;
             //  cout << linhaComMaisZeros << "debug" << endl;
             vector<float> novaLinha;
             for (int k = 0; k < C; k++)
             {
-                if (k == j)
+                if (k == j) //! Ignora a coluna do elemento atual da expansão índice j.
                     continue;
                 novaLinha.push_back(A[i][k]);
             }
             submatriz.push_back(novaLinha);
         }
 
-        float cofator = ((linhaComMaisZeros + j) % 2 == 0 ? 1 : -1) * A[linhaComMaisZeros][j];
+        //? que ganbiarra foi feita aqui
+        //! se as somas de linhacommais zeros e j, forem par é positvo a soma é + se não é -
+        float cofator;
+        // cout << linhaComMaisZeros << "linhas com zeros \n";
+        // cout << j << "j \n";
+        // cout <<  A[linhaComMaisZeros][j] << "matriz A \n";
+        //! primeiro é somado os indices da matriz A (original), é fixado a linha com mais zeros, é ignorado a coluna do valor j
+        // ! é formado a submatriz, calculado o determinante
+        if ((linhaComMaisZeros + j) % 2 == 0)
+        {
+
+            //  cout << cofator << "cofator \n";
+            cofator = 1 * A[linhaComMaisZeros][j];
+        }
+        else
+        {
+            cofator = -1 * A[linhaComMaisZeros][j];
+        }
+
+        //! aqui recebe det da sub matriz
         float detSub = detlaplace(submatriz);
+
         determinante += cofator * detSub;
     }
     // cout << determinante << "det \n";
@@ -385,7 +444,7 @@ vector<vector<float>> Matriz_inversa(vector<vector<float>> matrizI)
     {
         float divisor = matrizI[i][i];
 
-         if (fabs(divisor) < 1e-6)
+        if (fabs(divisor) < 1e-6)
         {
             cout << "Erro: pivo zero. Matriz pode n ser inversível.\n";
             return {};
@@ -419,7 +478,7 @@ vector<vector<float>> Matriz_inversa(vector<vector<float>> matrizI)
     {
         for (int j = 0; j < C; j++)
         {
-           // cout << fixed << setprecision(4) << matrizidentidade[i][j] << " ";
+            // cout << fixed << setprecision(4) << matrizidentidade[i][j] << " ";
         }
         cout << "\n";
     }
@@ -427,10 +486,10 @@ vector<vector<float>> Matriz_inversa(vector<vector<float>> matrizI)
     return matrizidentidade;
 }
 
-void FaseI(const string &Arquivo)
+void FaseI(const string &Arquivo, vector<vector<float>> matrizb, vector<vector<float>> Matriz_a, vector<string> variaveisfolga)
 {
     ifstream arquivo(Arquivo);
-
+    cout << "entrei Fase I \n";
     string linha;
     getline(arquivo, linha);
 
@@ -464,6 +523,7 @@ void FaseI(const string &Arquivo)
         for (iter; iter != end; iter++)
         {
             string letra = iter->str();
+            // cout << letra << "AQUIII" << endl;
             size_t ultimo = iter->position();
 
             // cout << letra <<endl;
@@ -505,40 +565,362 @@ void FaseI(const string &Arquivo)
 
         cout << novaLinha << endl;
     }
+
+    for (int i = 0; i < matrizb.size(); i++)
+    {
+        bool alterado = false;
+        for (int j = 0; j < matrizb[i].size(); j++)
+        {
+
+            if (matrizb[i][j] < 0)
+            {
+
+                for (int k = 0; k < Matriz_a[i].size(); k++)
+                {
+                    if (Matriz_a[i][k] != 0)
+                    {
+                        Matriz_a[i][k] *= -1;
+                    }
+
+                    // cout << setw(Matriz_a.size()) << Matriz_a[i][k] << " ";
+                }
+                matrizb[i][j] *= -1;
+                cout << setw(matrizb.size()) << matrizb[i][j] << " ";
+
+                for (int l = 1; l < variaveisfolga.size(); l++)
+                {
+                    if (variaveisfolga[l] == "<=")
+                    {
+                        variaveisfolga[l] = ">=";
+                    }
+                    else
+                    {
+                        if (variaveisfolga[l] == ">=")
+                        {
+                            variaveisfolga[l] = "<=";
+                        }
+                    }
+
+                    alterado = true;
+                }
+                cout << endl;
+            }
+        }
+    }
+
+for (int i = 0; i < Matriz_a.size(); i++) // linhas
+{
+    for (int j = 0; j < Matriz_a[i].size(); j++) // colunas
+    {
+        cout << setw(5) << Matriz_a[i][j] << " ";
+    }
+    cout << endl;
 }
 
-void FaseII(const string &Arquivo, vector<vector<float>> basica, vector<vector<float>> b)
+
+    for (int z = 1; z < variaveisfolga.size(); z++)
+    {
+        cout << variaveisfolga[z] << endl;
+    }
+}
+
+vector<float> custos(const string &Arquivo, int C)
 {
-    vector<vector<float>> xb;
-    xb = Matriz_inversa(basica); // multiplicação
-
-  //?  multiplique(xb,b);
-    cout << "AQUI\n";
-    vector<float> var;
-
     ifstream arquivo(Arquivo);
 
     string linha;
     getline(arquivo, linha);
 
-    string novaLinha;
-    // Separa parte antes e depois do '='
-    size_t Igual = linha.find('=');
-    string direita = linha.substr(Igual + 1); //! Ex: "2x1 + x2"
-    string linha1;
-
-    pair<vector<float>, vector<string>> resultado = floatvarialvel(linha1);
-
-    var = resultado.first;
-     cout << "o que de duvidoso esta sendo printado \n";
-    for (int i = 0; i < var.size(); i++)
+    //  vector <float> novaLinha;
+    const int TOTAL_VARIAVEIS = C;
+    vector<float> novaLinha(TOTAL_VARIAVEIS, 0.0);
+    regex coef("([+-]?\\s*\\d*\\.?\\d*)\\s*([a-zA-Z])(\\d+)");
+    // Verifica se é um problema de maximização
+    if (regex_search(linha, coef))
     {
-       
-        cout << var[i] << endl;
+
+        // Separa parte antes e depois do '='
+        size_t Igual = linha.find('=');
+        if (Igual == string::npos)
+        {
+            cerr << "Formato inválido da função objetivo.\n";
+            //  return;
+        }
+
+        //  string esquerda = linha.substr(0, Igual); //! Ex: "min z"
+        string direita = linha.substr(Igual + 1); //! Ex: "2x1 + x2"
+        string Modificada;
+
+        //! Para encontrar coeficientes e variáveis
+
+        sregex_iterator iter(direita.begin(), direita.end(), coef);
+        sregex_iterator end;
+
+        //*percorrer a primeira a linha
+        size_t fim = 0;
+        for (iter; iter != end; iter++)
+        {
+            string letra = iter->str();
+
+            size_t ultimo = iter->position();
+            int varIndice = stoi(iter->str(3)) - 1;
+
+            //! aqui estou pegando a parte do min z
+
+            string valores = iter->str(1);
+
+            //  cout << "valores " << valores <<< endl;
+            string x = iter->str(2);
+
+            //! para remover os espaços dos valores
+            valores.erase(remove(valores.begin(), valores.end(), ' '), valores.end());
+            //! para verifcar os valores como x1
+            if (valores.empty() || valores == "+")
+            {
+                valores += "1";
+            }
+            else if (valores == "-")
+                valores = "-1";
+
+            //! para converter uma string para um float
+            float coef = stof(valores);
+            // novaLinha.push_back(coef);
+            if (varIndice >= 0 && varIndice < TOTAL_VARIAVEIS)
+            {
+                novaLinha[varIndice] = coef;
+            }
+        }
+        //! substr é para pegar uma parte da string, acessa o inicio ou o final
+        //  Modificada += direita.substr(fim);
+
+        for (int i = 0; i < novaLinha.size(); i++)
+        {
+            //     cout << "Nova Linha " << novaLinha[i] << endl;
+        }
     }
-    
+
+    return novaLinha;
 }
 
+vector<float> matrizXvetor(vector<vector<float>> matrizz, vector<float> vetor)
+{
+
+    int linhas = matrizz.size();
+    int colunas = matrizz[0].size();
+
+    if (vetor.size() != colunas)
+    {
+        throw runtime_error("Erro: número de colunas da matriz deve ser igual ao tamanho do vetor.");
+    }
+
+    vector<float> resultado(linhas, 0.0);
+    for (int i = 0; i < linhas; i++)
+    {
+        for (int j = 0; j < colunas; j++)
+        {
+
+            // cout << "mult \n";
+            resultado[i] += matrizz[i][j] * vetor[j];
+            // cout << matrizz[i][j] << endl;
+            // cout << vetor[k] <<"vetor" <<endl;
+        }
+    }
+
+    return resultado;
+}
+vector<vector<float>> transporMatriz(const vector<vector<float>> &matriz)
+{
+    if (matriz.empty())
+        return {};
+
+    int linhas = matriz.size();
+    int colunas = matriz[0].size();
+
+    vector<vector<float>> transposta(colunas, vector<float>(linhas, 0.0));
+
+    for (int i = 0; i < linhas; ++i)
+    {
+        for (int j = 0; j < colunas; ++j)
+        {
+            transposta[j][i] = matriz[i][j];
+        }
+    }
+
+    return transposta;
+}
+float multivetor(const vector<float> &a, const vector<float> &b)
+{
+    if (a.size() != b.size())
+    {
+        throw runtime_error("Vetores de tamanhos diferentes");
+    }
+
+    float soma = 0;
+    for (int i = 0; i < a.size(); ++i)
+    {
+        soma += a[i] * b[i];
+    }
+    return soma;
+}
+
+// TODO matrizBasica, matrizB, escolhidas, naoescolhidasindices, matriznaoBasica
+void FaseII(const string &Arquivo, vector<vector<float>> basica, vector<float> custosbasicos, vector<float> custosnbasicos, vector<vector<float>> matrizNb, vector<vector<float>> Matrizb)
+{
+    bool otimo = false;
+    int iteracao = 0;
+    while (!otimo)
+    {
+        iteracao++;
+
+        //! Aqui é para ser o passo I
+        vector<vector<float>> inversaB;
+        vector<float> b;
+
+        for (int i = 0; i < Matrizb.size(); ++i)
+        {
+            //! inserindo os valores da Matriz B no vetor
+            b.push_back(Matrizb[i][0]);
+        }
+        inversaB = Matriz_inversa(basica); // multiplicação
+        vector<float> Xb;
+
+        Xb = matrizXvetor(inversaB, b);
+
+        cout << "inversa \n";
+        for (int i = 0; i < inversaB.size(); i++)
+        {
+            for (int j = 0; j < inversaB.size(); j++)
+            {
+
+                cout << setw(inversaB.size()) << inversaB[i][j] << " ";
+            }
+            cout << endl;
+        }
+
+        //! 2.1 {vetor multiplicador simplex}
+        vector<float> lambd;
+        lambd = matrizXvetor(inversaB, custosbasicos);
+        cout << "lambd \n";
+        for (int i = 0; i < lambd.size(); i++)
+        {
+            cout << lambd[i] << endl;
+        }
+
+        vector<float> custorelativo;
+        cout << "nao basica \n";
+        for (int i = 0; i < matrizNb.size(); i++)
+        {
+            for (int j = 0; j < matrizNb[i].size(); j++)
+            {
+                cout << setw(matrizNb.size()) << matrizNb[i][j] << " ";
+                //! Esta preenchendo com 0
+            }
+            cout << endl;
+        }
+        // TODO multiplicação de vetor com vetor
+
+        //! coluna da não basica
+        //! 2.2 {custos relativos}
+
+        //!! Revisar melhor o que foi feito
+        for (int j = 0; j < matrizNb[0].size(); j++)
+        {
+            vector<float> coluna;
+            for (int i = 0; i < matrizNb.size(); i++)
+            {
+                coluna.push_back(matrizNb[i][j]);
+            }
+            float resultado = multivetor(lambd, coluna);
+
+            float custo = custosnbasicos[j] - resultado;
+            custorelativo.push_back(custo);
+            cout << "Custo relativo " << j << ": " << custo << endl;
+        }
+
+        //!  {determina¸c˜ao da vari´avel a entrar na base}
+        auto it = min_element(custorelativo.begin(), custorelativo.end());
+        float menorValor = *it;
+        cout << menorValor << "Menor valor \n";
+        int indiceMenor = distance(custorelativo.begin(), it);
+        int k = indiceMenor;
+        cout << k << "Indice do menor \n";
+
+        // Verificação
+
+        // 2 9 0 -1
+        for (int i = 0; i < custorelativo.size(); i++)
+        {
+            if (custorelativo[i] > 0)
+            {
+                otimo = true;
+                cout << "Aqui o algoritmo deve parar, qunado tudo estiver certo \n";
+                break;
+            }
+        }
+        // Agora usamos o índice para acessar a coluna da matriz não-básica
+        if (otimo)
+        {
+            break;
+        }
+        int colunanaobasica = k;
+        vector<float> Colunaescolhida;
+        // cout << "Coluna da matrizNb escolhida (índice " << colunanaobasica << "):\n";
+        for (int i = 0; i < matrizNb.size(); ++i)
+        {
+            //            cout << matrizNb[i][colunanaobasica] << endl;
+            Colunaescolhida.push_back(matrizNb[i][colunanaobasica]);
+        }
+
+        vector<float> y;
+        for (int i = 0; i < matrizNb.size(); ++i)
+        {
+
+            y.push_back(multivetor(Xb, Colunaescolhida));
+        }
+
+        //! A inversa da matriz basica multiplicada pela matriz B
+
+        for (int i = 0; i < y.size(); ++i)
+        {
+
+            if (y[i] <= 0)
+            {
+                continue;
+            }
+            else
+            {
+                cout << "AQUI \n";
+
+                float valormenor = numeric_limits<float>::max();
+                int indicesai = -1;
+                for (int i = 0; i < y.size(); i++)
+                {
+
+                    if (y[i] > 0)
+                    {
+                        float valor = Xb[i] / y[i];
+
+                        if (valor < valormenor)
+                        {
+                            valormenor = valor;
+                            indicesai = i;
+                        }
+                    }
+
+                    //! pegar o menor valor realizado pela divisao
+                }
+                int valorsai = 0;
+
+                for (int i = 0; i < basica.size(); i++)
+                {
+                    valorsai = basica[i][indicesai];
+                    basica[i][indiceMenor] = matrizNb[i][k];
+                    matrizNb[i][k] = valorsai;
+                }
+            }
+        }
+    }
+}
 int main()
 {
     //*Para recerber as variaveis (tipo String)
@@ -551,6 +933,7 @@ int main()
     vector<float> nf;
     vector<float> f;
     vector<string> vf;
+    vector<float> CB;
 
     //* matriz para calcular o laplace
 
@@ -585,8 +968,8 @@ int main()
     fn = resulf.second;
 
     //* referente a função intfloat
-    //MB = numint.first;
-   // nf = numint.second;
+    // MB = numint.first;
+    // nf = numint.second;
 
     //! contador de variaveis
     int nVariaveis = 0;
@@ -608,7 +991,7 @@ int main()
     }
     arquivo.close();
 
-    cout << nVariaveis <<"variaveis n"<<endl;
+    // cout << nVariaveis <<"variaveis n"<<endl;
     //! Vetor para receber as variaveis de folga
     vector<string> folga;
     //* variaveis contadores que não podem mudar de lugar
@@ -618,7 +1001,7 @@ int main()
     {
         //! Para receber as variaveis referente a intfloat
 
-     //   cout << MB[i] << "  numeros inteiros \n";
+        //   cout << MB[i] << "  numeros inteiros \n";
         inteiros++;
     }
     if (nf.size() > 0)
@@ -627,7 +1010,7 @@ int main()
         {
             //! Para receber as variaveis referente a intfloat
 
-         //    cout << nf[i] << "  numeros decimal \n";
+            //    cout << nf[i] << "  numeros decimal \n";
             decimal++;
         }
     }
@@ -636,26 +1019,22 @@ int main()
     for (int i = 0; i < lines - 1; i++)
     {
 
-     //   cout << variaveis[i] << "  Variaveis\n ";
+        //   cout << variaveis[i] << "  Variaveis\n ";
 
         cont++;
     }
     int cvariaveis = 0;
-      for (int i = 0; i < fn.size(); i++)
+    for (int i = 0; i < fn.size(); i++)
     {
 
-     cout << fn[i] << "  Variaveis\n ";
-    cvariaveis++;
+        cout << fn[i] << "  Variaveis\n ";
+        cvariaveis++;
     }
 
     for (int i = 0; i < numerof.size(); i++)
     {
-     //   cout << numerof[i] << " I numeros float\n";
-
+        //   cout << numerof[i] << " I numeros float\n";
     }
-
-   
-    
 
     int cont2 = 0, v = 0;
 
@@ -664,7 +1043,7 @@ int main()
 
         if (Vfolga[i] == ">=" || Vfolga[i] == "<=")
         {
-            //  cout << Vfolga[i] << " Variaveis de Folga \n";
+            cout << Vfolga[i] << " Variaveis de Folga \n";
 
             cont2++;
         }
@@ -710,49 +1089,46 @@ int main()
             if (idx < numerof.size())
             {
                 //* MatrizA recebendo valores
-                cout << "aqui a matriz" << numerof[idx] << endl;
+                // cout << "aqui a matriz" << numerof[idx] << endl;
                 MatrizA[i][j] = numerof[idx++];
-                cout << MatrizA[i][j] <<"Matriz A" << endl;
+                // cout << MatrizA[i][j] <<"Matriz A" << endl;
             }
         }
     }
 
     //! Contador da MatrizB
-   int idx2 = 0;
-for (int i = 0; i < LinhaB; i++)
-{
-    for (int j = 0; j < ColunaB / 2; j++)
+    int idx2 = 0;
+    for (int i = 0; i < LinhaB; i++)
     {
-        if (idx2 < MB.size())
+        for (int j = 0; j < ColunaB / 2; j++)
         {
-            if (MB[idx2] != 0)
+            if (idx2 < MB.size())
             {
-                MatrizB[i][j] = MB[idx2++];
+                if (MB[idx2] != 0)
+                {
+                    MatrizB[i][j] = MB[idx2++];
+                }
             }
         }
     }
-}
-
 
     //! Contador da MatrizB
-
 
     int idxFolga = 1;          //! é necessario que comece com 1
     int colFolga = nVariaveis; //* Para receber a quantidade de variaveis
 
-    for (int i = 0; i < L && idxFolga < f.size(); i++)
+    for (int i = 0; i < L; i++)
     {
 
         if (idxFolga < f.size())
         {
             if (f[idxFolga] != 0)
             {
-                // cout << f[idxFolga] << endl;
+
                 MatrizA[i][colFolga] = f[idxFolga];
+
                 colFolga++; // só avança se for folga válida
-                // cout << MatrizA[i][colFolga] << "Mais um teste"<<endl;
             }
-           
         }
         idxFolga++;
     }
@@ -767,13 +1143,13 @@ for (int i = 0; i < LinhaB; i++)
         }
         cout << endl;
     }
-
+    custos(nomeArquivo, C);
     cout << "Matriz B \n";
     for (int i = 0; i < LinhaB; i++)
     {
         for (int j = 0; j < ColunaB; j++)
         {
-         
+
             if (MatrizB[i][j] != 0)
             {
                 cout << setw(MatrizB.size()) << MatrizB[i][j] << "\n";
@@ -783,28 +1159,42 @@ for (int i = 0; i < LinhaB; i++)
 
     // TODO fazer a matriz basica, escolher aleatoriamente 3 culunas e linhas da matriz A.
     // TODO determinante, inversa e soma
-
+    int colunaA = C;
     //* Vetor de indices
-    vector<int> indices(lines);
+    vector<int> indices(colunaA);
 
-    for (int i = 0; i < lines; i++)
+    for (int i = 0; i < colunaA; i++)
     {
         indices[i] = i;
     }
 
     random_device rd;
     default_random_engine gerador(rd());
-
+    //? verificar o valor que esta sendo sorteado
     shuffle(indices.begin(), indices.end(), gerador);
+    int colunasSelecionadas = lines;
 
-    vector<int> colunas_escolhidas(indices.begin(), indices.begin() + lines);
+    vector<int> Colescolhidas(indices.begin(), indices.begin() + colunasSelecionadas);
+    vector<float> escolhidas(colunasSelecionadas);
+
+    set<int> escolhidasSet(Colescolhidas.begin(), Colescolhidas.end());
+    vector<float> naoEscolhidasIndices;
+
+    for (int i = 0; i < colunaA; i++)
+    {
+        if (escolhidasSet.find(i) == escolhidasSet.end())
+        {
+            naoEscolhidasIndices.push_back(i);
+        }
+    }
 
     for (int i = 0; i < lines; i++)
     {
-        for (int j = 0; j < lines; j++)
+        for (int j = 0; j < colunaA; j++)
         {
 
-            int coluna_escolhida = colunas_escolhidas[j];
+            int coluna_escolhida = Colescolhidas[j];
+            escolhidas[j] = coluna_escolhida;
             MatrizBasica[i][j] = MatrizA[i][coluna_escolhida];
         }
     }
@@ -827,9 +1217,10 @@ for (int i = 0; i < LinhaB; i++)
     // cout << Cnaobasica << "c";
     vector<int> todas_colunas(C);
 
+    //? verificar a linha 849
     iota(todas_colunas.begin(), todas_colunas.end(), 0);
 
-    for (int idx : colunas_escolhidas)
+    for (int idx : Colescolhidas)
     {
         todas_colunas.erase(remove(todas_colunas.begin(), todas_colunas.end(), idx), todas_colunas.end());
     }
@@ -858,30 +1249,45 @@ for (int i = 0; i < LinhaB; i++)
     }
 
     // cout << "AQUII \n";
-    vector<vector<float>> matriz = {
-        {2, 1},
-        {1, 1}};
 
     vector<vector<float>> matriz2 = {
         {2, 1},
         {1, 2}};
 
-    vector<vector<float>> matrizResultado = multiplique(matriz, matriz2);
+    //    vector<vector<float>> matrizResultado = multiplique(matriz, matriz2);
     vector<vector<float>> matrizlaplace = {
-        {4, 5, -3, 0},
-        {2, -1, 3, 1},
-        {1, -3, 2, 1},
-        {0, 2, -2, 5}};
-   // detlaplace(matrizlaplace);
+        {-3, 1, -2, 1},
+        {5, 2, 2, 3},
+        {7, 4, -5, 0},
+        {1, -1, 11, 2}};
+    // cout << detlaplace(matrizlaplace) << endl;
 
     vector<vector<float>> matriziversa = {
         {1, 2, 3},
         {0, 1, 4},
         {0, 0, 1}};
-    //FaseI(nomeArquivo);
-    FaseII(nomeArquivo,MatrizBasica,MatrizB);
-    //Matriz_inversa(matriziversa);
-    cout << "Aquiii \n";
 
+    //!  CB = custos(nomeArquivo, C); essa função não é para custos
+
+    // Matriz_inversa(matriziversa);
+
+    //!
+
+    // pot = X1(nomeArquivo);
+    FaseI(nomeArquivo, MatrizB, MatrizA, Vfolga);
+    for (int i = 0; i < escolhidas.size(); i++)
+    {
+        //  cout << escolhidas[i] << "custos basico" << endl;
+    }
+
+    for (int i = 0; i < naoEscolhidasIndices.size(); i++)
+    {
+        // cout << naoEscolhidasIndices[i] << "custos nao basico" << endl;
+    }
+    // TODO  matrizXvetor(matrizZ, vetorR);
+    // TODO matrizBasica, matrizB, escolhidas, naoescolhidasindices, matriznaoBasica
+    // FaseII(nomeArquivo, MatrizBasica, escolhidas, naoEscolhidasIndices, MatriznaoBasica, MatrizB);
+
+    cout << "AAAAA\n";
     return 0;
 }
